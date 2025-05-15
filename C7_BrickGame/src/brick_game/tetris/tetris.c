@@ -11,7 +11,7 @@ void handle_user_input(user_action_t action, bool hold);
 void draw_game(game_info_t *game);
 void start_game(void);
 void move_down(void);
-void check_collision(void);
+bool check_collision(void);
 void free_game(game_info_t *game);
 
 int main(void) {
