@@ -106,6 +106,30 @@ game_info_t *get_game(void) {
     return game_instance;
 }
 
+bool check_collision(void) {
+    game_info_t *game = get_game();  // Получаем текущее состояние игры
+    tetromino_t *t = &game->current_tetromino;
+
+    for (int y = 0; y < TETROMINO_SIZE; y++) {
+        for (int x = 0; x < TETROMINO_SIZE; x++) {
+            if (t->shape[y][x]) {
+                int field_x = t->x + x;
+                int field_y = t->y + y;
+
+                if (field_x < 0 || field_x >= FIELD_WIDTH || field_y < 0 || field_y >= FIELD_HEIGHT) {
+                    return true;  // Столкновение с границей
+                }
+
+                if (game->field[field_y][field_x]) {
+                    return true;  // Столкновение с занятым полем
+                }
+            }
+        }
+    }
+
+    return false;  // Столкновений нет
+}
+
 void init_board(void) {
     game_info_t *game = get_game();
     for (int r = 0; r < BOARD_HEIGHT; r++)
