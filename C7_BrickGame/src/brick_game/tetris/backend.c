@@ -108,27 +108,29 @@ game_info_t *get_game(void) {
 }
 
 bool check_collision(void) {
-    game_info_t *game = get_game();  // Получаем текущее состояние игры
-    tetromino_t *t = &game->current_tetromino;
+    game_info_t *game = get_game();
 
-    for (int y = 0; y < TETROMINO_SIZE; y++) {
-        for (int x = 0; x < TETROMINO_SIZE; x++) {
-            if (t->shape[y][x]) {
-                int field_x = t->x + x;
-                int field_y = t->y + y;
+    for (int y = 0; y < FIGURE_SIZE; y++) {
+        for (int x = 0; x < FIGURE_SIZE; x++) {
+            if (game->current_figure[y][x]) {
+                int board_x = game->current_x + x;
+                int board_y = game->current_y + y;
 
-                if (field_x < 0 || field_x >= FIELD_WIDTH || field_y < 0 || field_y >= FIELD_HEIGHT) {
-                    return true;  // Столкновение с границей
+                // Проверка на выход за пределы поля
+                if (board_x < 0 || board_x >= BOARD_WIDTH ||
+                    board_y < 0 || board_y >= BOARD_HEIGHT) {
+                    return true;
                 }
 
-                if (game->field[field_y][field_x]) {
-                    return true;  // Столкновение с занятым полем
+                // Проверка на столкновение с другими блоками
+                if (game->board[board_y][board_x]) {
+                    return true;
                 }
             }
         }
     }
 
-    return false;  // Столкновений нет
+    return false;
 }
 
 void init_board(void) {
