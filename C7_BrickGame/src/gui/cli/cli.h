@@ -13,42 +13,54 @@
 #define FIELD_WIDTH BOARD_WIDTH
 #define WINDOW_WIDTH 80
 
+typedef enum {
+    ACTION_NONE,
+    ACTION_START,
+    ACTION_TERMINATE,
+    ACTION_PAUSE,
+    ACTION_MOVE_LEFT,
+    ACTION_MOVE_RIGHT,
+    ACTION_ROTATE,
+    ACTION_DROP,
+    ACTION_MOVE_DOWN
+} user_action_t;
+
 typedef struct {
-    int board[BOARD_HEIGHT][BOARD_WIDTH];         // Игровое поле
-    int next_figure[FIGURE_SIZE][FIGURE_SIZE];    // Следующая фигура
-    int current_figure[FIGURE_SIZE][FIGURE_SIZE]; // Текущая фигура
-    int current_x;                                 // Координата X текущей фигуры
-    int current_y;                                 // Координата Y текущей фигуры
-    int level;                                    // Текущий уровень
-    int score;                                    // Текущий счет
-    int high_score;                               // Рекордный счет
-    bool paused;                                  // Флаг паузы
-    bool game_started;                            // Флаг начала игры
+    int board[BOARD_HEIGHT][BOARD_WIDTH];
+    int next_figure[FIGURE_SIZE][FIGURE_SIZE];
+    int current_figure[FIGURE_SIZE][FIGURE_SIZE];
+    int current_x;
+    int current_y;
+    int level;
+    int score;
+    int high_score;
+    int speed;
+    int tick;
+    bool paused;
+    bool game_started;
+    bool game_over;
 } game_info_t;
 
-// Инициализация ncurses и графического интерфейса
+// GUI functions
 void init_gui(void);
-
-// Отрисовка всего игрового окна и интерфейса
+void quit_ncurses(void);
 void draw_game(const game_info_t *game);
-
-// Отрисовка окна (границ)
 void draw_window(void);
-
-// Отрисовка прямоугольника с заданными координатами (границы окна и панелей)
 void draw_rectangle(int top, int bottom, int left, int right);
-
-// Отрисовка игровой информации (уровень, счет, пауза, инструкции)
 void draw_info(const game_info_t *game);
-
-// Отрисовка следующей фигуры
 void draw_next(const int **next_figure);
-
-// Отрисовка игрового поля
 void draw_field(const int **board);
-
-// Отрисовка текущей активной фигуры
 void draw_current(const game_info_t *game);
 
+// Game control functions (to be implemented in game logic)
+game_info_t* get_game(void);
+user_action_t get_user_action(void);
+void start_game(void);
+void handle_user_input(user_action_t action, bool from_timer);
+void check_collision(void);
+void move_down(void);
+void free_game(game_info_t *game);
+
 #endif // CLI_H
+
 
