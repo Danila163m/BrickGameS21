@@ -54,8 +54,6 @@ static const int figures[7][4][FIGURE_SIZE][FIGURE_SIZE] = {
 
 static game_info_t *game_instance = NULL;
 
-// Вспомогательная функция для выделения двумерного массива int**
-// rows - число строк, cols - число столбцов
 static int** alloc_2d_int(int rows, int cols) {
     int **arr = malloc(rows * sizeof(int*));
     if (!arr) return NULL;
@@ -70,7 +68,6 @@ static int** alloc_2d_int(int rows, int cols) {
     return arr;
 }
 
-// Вспомогательная функция освобождения двумерного массива
 static void free_2d_int(int **arr) {
     if (!arr) return;
     free(arr[0]);
@@ -80,15 +77,14 @@ static void free_2d_int(int **arr) {
 game_info_t *get_game(void) {
     if (!game_instance) {
         game_instance = malloc(sizeof(game_info_t));
-        if (!game_instance) {
-            terminate_with_error("Failed to allocate game_info_t");
-        }
+        if (!game_instance) terminate_with_error("Failed to allocate game_info_t");
+
         game_instance->board = alloc_2d_int(BOARD_HEIGHT, BOARD_WIDTH);
         game_instance->next_figure = alloc_2d_int(FIGURE_SIZE, FIGURE_SIZE);
         game_instance->current_figure = alloc_2d_int(FIGURE_SIZE, FIGURE_SIZE);
-        if (!game_instance->board || !game_instance->next_figure || !game_instance->current_figure) {
+        if (!game_instance->board || !game_instance->next_figure || !game_instance->current_figure)
             terminate_with_error("Failed to allocate game arrays");
-        }
+
         game_instance->score = 0;
         game_instance->high_score = load_high_score();
         game_instance->level = 1;
@@ -96,13 +92,14 @@ game_info_t *get_game(void) {
         game_instance->paused = false;
         game_instance->game_over = false;
         game_instance->game_started = false;
-        game_instance->current_x = BOARD_WIDTH / 2 - 2; // стартовое положение по X
+        game_instance->current_x = BOARD_WIDTH / 2 - 2;
         game_instance->current_y = 0;
         game_instance->current_orientation = 0;
         game_instance->next_orientation = 0;
         game_instance->current_type = 0;
         game_instance->next_type = 0;
         game_instance->tick = 0;
+
         drop_next_figure();
         drop_current_figure();
     }
@@ -134,22 +131,19 @@ void drop_next_figure(void) {
     game_info_t *game = get_game();
     game->next_type = rand() % 7;
     game->next_orientation = rand() % 4;
-    for (int i = 0; i < FIGURE_SIZE; i++) {
-        for (int j = 0; j < FIGURE_SIZE; j++) {
+    for (int i = 0; i < FIGURE_SIZE; i++)
+        for (int j = 0; j < FIGURE_SIZE; j++)
             game->next_figure[i][j] = figures[game->next_type][game->next_orientation][i][j];
-        }
-    }
 }
 
 void drop_current_figure(void) {
     game_info_t *game = get_game();
     game->current_type = game->next_type;
     game->current_orientation = game->next_orientation;
-    for (int i = 0; i < FIGURE_SIZE; i++) {
-        for (int j = 0; j < FIGURE_SIZE; j++) {
+    for (int i = 0; i < FIGURE_SIZE; i++)
+        for (int j = 0; j < FIGURE_SIZE; j++)
             game->current_figure[i][j] = game->next_figure[i][j];
-        }
-    }
+
     drop_next_figure();
     game->current_x = BOARD_WIDTH / 2 - 2;
     game->current_y = 0;
@@ -159,14 +153,11 @@ static bool can_place_figure(int x, int y, int type, int orientation) {
     game_info_t *game = get_game();
     for (int i = 0; i < FIGURE_SIZE; i++) {
         for (int j = 0; j < FIGURE_SIZE; j++) {
-            int block = figures[type][orientation][i][j];
-            if (block) {
-                int board_x = x + j;
-                int board_y = y + i;
-                if (board_x < 0 || board_x >= BOARD_WIDTH || board_y >= BOARD_HEIGHT)
-                    return false;
-                if (board_y >= 0 && game->board[board_y][board_x])
-                    return false;
+            if (figures[type][orientation][i][j]) {
+                int bx = x + j;
+                int by = y + i;
+                if (bx < 0 || bx >= BOARD_WIDTH || by >= BOARD_HEIGHT) return false;
+                if (by >= 0 && game->board[by][bx]) return false;
             }
         }
     }
@@ -179,11 +170,9 @@ void rotate_current_figure(void) {
     int new_orientation = (game->current_orientation + 1) % 4;
     if (can_place_figure(game->current_x, game->current_y, game->current_type, new_orientation)) {
         game->current_orientation = new_orientation;
-        for (int i = 0; i < FIGURE_SIZE; i++) {
-            for (int j = 0; j < FIGURE_SIZE; j++) {
+        for (int i = 0; i < FIGURE_SIZE; i++)
+            for (int j = 0; j < FIGURE_SIZE; j++)
                 game->current_figure[i][j] = figures[game->current_type][new_orientation][i][j];
-            }
-        }
     }
 }
 
@@ -191,18 +180,16 @@ void move_left(void) {
     game_info_t *game = get_game();
     if (game->paused || game->game_over) return;
     int new_x = game->current_x - 1;
-    if (can_place_figure(new_x, game->current_y, game->current_type, game->current_orientation)) {
+    if (can_place_figure(new_x, game->current_y, game->current_type, game->current_orientation))
         game->current_x = new_x;
-    }
 }
 
 void move_right(void) {
     game_info_t *game = get_game();
     if (game->paused || game->game_over) return;
     int new_x = game->current_x + 1;
-    if (can_place_figure(new_x, game->current_y, game->current_type, game->current_orientation)) {
+    if (can_place_figure(new_x, game->current_y, game->current_type, game->current_orientation))
         game->current_x = new_x;
-    }
 }
 
 void move_down(void) {
@@ -212,55 +199,46 @@ void move_down(void) {
     if (can_place_figure(game->current_x, new_y, game->current_type, game->current_orientation)) {
         game->current_y = new_y;
     } else {
-        // Фигура не может опуститься — «приклеиваем» ее к доске
         for (int i = 0; i < FIGURE_SIZE; i++) {
             for (int j = 0; j < FIGURE_SIZE; j++) {
                 if (game->current_figure[i][j]) {
                     int bx = game->current_x + j;
                     int by = game->current_y + i;
-                    if (by >= 0 && by < BOARD_HEIGHT && bx >= 0 && bx < BOARD_WIDTH) {
+                    if (by >= 0 && by < BOARD_HEIGHT && bx >= 0 && bx < BOARD_WIDTH)
                         game->board[by][bx] = 1;
-                    }
                 }
             }
         }
         check_and_remove_lines();
         drop_current_figure();
-
-        if (!can_place_figure(game->current_x, game->current_y, game->current_type, game->current_orientation)) {
+        if (!can_place_figure(game->current_x, game->current_y, game->current_type, game->current_orientation))
             set_game_over();
-        }
     }
 }
 
 void hard_drop(void) {
     game_info_t *game = get_game();
     if (game->paused || game->game_over) return;
-    while (can_place_figure(game->current_x, game->current_y + 1, game->current_type, game->current_orientation)) {
+    while (can_place_figure(game->current_x, game->current_y + 1, game->current_type, game->current_orientation))
         game->current_y++;
-    }
-    move_down();  // чтобы "приклеить" фигуру
+    move_down();
 }
 
 bool is_line_full(int row) {
     game_info_t *game = get_game();
     for (int c = 0; c < BOARD_WIDTH; c++) {
-        if (game->board[row][c] == 0)
-            return false;
+        if (game->board[row][c] == 0) return false;
     }
     return true;
 }
 
 void remove_line(int row) {
     game_info_t *game = get_game();
-    for (int r = row; r > 0; r--) {
-        for (int c = 0; c < BOARD_WIDTH; c++) {
+    for (int r = row; r > 0; r--)
+        for (int c = 0; c < BOARD_WIDTH; c++)
             game->board[r][c] = game->board[r - 1][c];
-        }
-    }
-    for (int c = 0; c < BOARD_WIDTH; c++) {
+    for (int c = 0; c < BOARD_WIDTH; c++)
         game->board[0][c] = 0;
-    }
 }
 
 void check_and_remove_lines(void) {
@@ -270,21 +248,24 @@ void check_and_remove_lines(void) {
         if (is_line_full(r)) {
             remove_line(r);
             lines_cleared++;
+            r--; // Проверяем ту же строку снова, так как она сдвинулась вниз
         }
     }
-    // Обновление счета и уровня, например:
+
     switch (lines_cleared) {
         case 1: game->score += 100 * game->level; break;
         case 2: game->score += 300 * game->level; break;
         case 3: game->score += 500 * game->level; break;
         case 4: game->score += 800 * game->level; break;
     }
-    // Повышаем уровень каждые 1000 очков
-    if (game->score / 1000 + 1 > game->level) {
-        game->level = game->score / 1000 + 1;
+
+    int new_level = game->score / 1000 + 1;
+    if (new_level > game->level) {
+        game->level = new_level;
         game->speed = 50 - (game->level - 1) * 5;
         if (game->speed < 10) game->speed = 10;
     }
+
     if (game->score > game->high_score) {
         game->high_score = game->score;
         save_high_score(game->high_score);
@@ -308,9 +289,7 @@ void handle_user_input(user_action_t action, bool hold) {
 }
 
 user_action_t get_user_action(void) {
-    // Возвращаем действие, возможно, полученное из ncurses input
-    // Здесь пустая заглушка, реализация зависит от UI слоя
-    return action_start;
+    return action_start; // Заглушка
 }
 
 int load_high_score(void) {
