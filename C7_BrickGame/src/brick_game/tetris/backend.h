@@ -56,7 +56,6 @@ void move_down(void);
 void move_left(void);
 void move_right(void);
 void hard_drop(void);
-void check_collision(void);
 void check_and_remove_lines(void);
 bool is_line_full(int row);
 void remove_line(int row);
