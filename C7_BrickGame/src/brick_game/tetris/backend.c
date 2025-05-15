@@ -273,6 +273,7 @@ void check_and_remove_lines(void) {
 }
 
 void handle_user_input(user_action_t action, bool hold) {
+    (void)hold;
     game_info_t *game = get_game();
     if (game->game_over) return;
     switch (action) {
