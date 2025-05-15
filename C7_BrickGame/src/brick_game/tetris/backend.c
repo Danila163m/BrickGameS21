@@ -1,4 +1,5 @@
 #include "backend.h"
+#include <stdbool.h>
 
 static const int figures[7][4][FIGURE_SIZE][FIGURE_SIZE] = {
     // I
