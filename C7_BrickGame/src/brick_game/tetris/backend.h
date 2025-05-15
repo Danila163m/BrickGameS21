@@ -42,6 +42,7 @@ typedef struct {
     bool game_started;
 } game_info_t;
 
+bool check_collision(void);
 void init_board(void);
 void init_next_figure(void);
 void init_current_figure(void);
