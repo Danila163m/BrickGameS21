@@ -373,6 +373,3 @@ void quit_ncurses(void) {
     endwin();
 }
 
-void quit_ncurses(void) {
-    endwin();
-}
